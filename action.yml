@@ -1,0 +1,81 @@
+name: "ADA Title II & PDF/UA-1 Auditor"
+description: "Zero-dependency ISO 14289-1 (PDF/UA-1) & WCAG 2.1 AA accessibility auditor for PDFs in your repository. Writes a Markdown table to Job Summary."
+author: "Second Foreman LLC"
+
+branding:
+  icon: "file-text"
+  color: "blue"
+
+inputs:
+  path:
+    description: "Root directory or single PDF file to scan."
+    required: false
+    default: "."
+  glob:
+    description: "Recursive glob pattern under path."
+    required: false
+    default: "**/*.pdf"
+  fail-on-error:
+    description: "Fail the CI workflow if any PDF falls below min-score or meets/exceeds fail-severity."
+    required: false
+    default: "false"
+  min-score:
+    description: "Minimum passing passScore (0-100) when fail-on-error is true."
+    required: false
+    default: "90"
+  fail-severity:
+    description: "Minimum severity (LOW, MEDIUM, HIGH, CRITICAL) that fails CI when fail-on-error is true."
+    required: false
+    default: "CRITICAL"
+  write-summary:
+    description: "Write a Markdown audit report table to $GITHUB_STEP_SUMMARY."
+    required: false
+    default: "true"
+  output-json:
+    description: "Optional file path to write the complete JSON audit report."
+    required: false
+    default: ""
+
+outputs:
+  total-pdfs:
+    description: "Total number of PDFs scanned."
+    value: ${{ steps.audit.outputs.total-pdfs }}
+  passed-pdfs:
+    description: "Number of PDFs scoring PASS."
+    value: ${{ steps.audit.outputs.passed-pdfs }}
+  failed-pdfs:
+    description: "Number of PDFs with conformance failures."
+    value: ${{ steps.audit.outputs.failed-pdfs }}
+  average-score:
+    description: "Average ISO 14289-1 / WCAG 2.1 AA passScore across scanned PDFs."
+    value: ${{ steps.audit.outputs.average-score }}
+  estimated-remediation-usd:
+    description: "Total estimated remediation cost in USD using Second Foreman LLC unit rates."
+    value: ${{ steps.audit.outputs.estimated-remediation-usd }}
+  report-json:
+    description: "Path to the JSON report if output-json was specified."
+    value: ${{ steps.audit.outputs.report-json }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run zero-dependency PDF/UA-1 accessibility audit
+      id: audit
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_GLOB: ${{ inputs.glob }}
+        INPUT_FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
+        INPUT_MIN_SCORE: ${{ inputs.min-score }}
+        INPUT_FAIL_SEVERITY: ${{ inputs.fail-severity }}
+        INPUT_WRITE_SUMMARY: ${{ inputs.write-summary }}
+        INPUT_OUTPUT_JSON: ${{ inputs.output-json }}
+      run: |
+        python3 "${{ github.action_path }}/audit_pdfs.py" \
+          --path "$INPUT_PATH" \
+          --glob "$INPUT_GLOB" \
+          --fail-on-error "$INPUT_FAIL_ON_ERROR" \
+          --min-score "$INPUT_MIN_SCORE" \
+          --fail-severity "$INPUT_FAIL_SEVERITY" \
+          --write-summary "$INPUT_WRITE_SUMMARY" \
+          --output-json "$INPUT_OUTPUT_JSON"
