@@ -1,5 +1,5 @@
 name: "ADA Title II & PDF/UA-1 Auditor"
-description: "Zero-dependency ISO 14289-1 (PDF/UA-1) & WCAG 2.1 AA accessibility auditor for PDFs in your repository. Writes a Markdown table to Job Summary."
+description: "Zero-dependency ISO 14289-1 (PDF/UA-1) & WCAG 2.1 AA accessibility auditor for repo PDFs with CI Job Summary reports."
 author: "Second Foreman LLC"
 
 branding:
